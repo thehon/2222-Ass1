@@ -1,0 +1,226 @@
+{% extends "core.html" %}
+{% block content %}
+    {% if course %}
+    <div class="row">
+        <div class="col-6">
+            <div class="title" style="display: flex;">
+                <h1 role="heading" aria-level="1">
+                    {{course.courseCode}}:
+                    {{course.courseName}}
+                </h1>
+            </div>
+        </div>
+        <div class="col-6" style="display: flex;">
+            <div class='action-buttons btn-group-vertical'>
+                <form action="/courses/{{course.courseCode}}" method="post" style="margin-left: auto">
+                    {% csrf_token %}
+                        {% if subscribed %}
+                            <button type="submit" name="code" value="{{course.courseCode}}" class="btn btn-danger" role="button">
+                            Remove from your courses
+                        {% else %}
+                            <button type="submit" name="code" value="{{course.courseCode}}" class="btn btn-primary" role="button">
+                            Add to your courses
+                        {% endif %}
+                    </button>
+                </form>
+                
+                {% if is_admin %}
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#adminModal" role="button">
+                Admin Remove Course
+                </button>
+        
+                <div class="modal fade" id="adminModal" tabindex="-1" role="dialog" aria-labelledby="adminModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="adminModalLabel">Admin Remove Course</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                Are you sure you want to remove <br><b>{{course.courseCode}}: {{course.courseName}} ?</b><br>
+                                This action <b>cannot </b> be undone.
+                            </p>
+                            <form action="/admin/{{course.id}}" method="post" role="form" aria-label="Remove Course">                        
+                                <input id="postType" type="hidden" name='postType' value="removeCourse">
+                                <input type="submit" value="Remove" class="btn btn-danger">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">
+                                    Cancel
+                                </button>
+                                {% csrf_token %}
+                            </form>
+                        </div>
+                        </div>
+                    </div>
+
+    
+    {% endif %}
+    </div>  
+    </div>
+    </div>
+    
+    
+    
+    {% else %}
+        <h1 role="heading">Course Not Found</h1>
+    {% endif %}
+    <div role='navigation'> 
+    <ul class="nav nav-tabs" id="myTab" role="tablist" >
+        <li class="nav-item" role="tab">
+            <a class="nav-link active" id="discussion-tab" data-toggle="tab" href="#discussion" role="tab" aria-controls="discussion" aria-selected="true" tab-index="0">Discussion</a>
+        </li>
+         <li class="nav-item" role="tab">
+            <a class="nav-link" id="resources-tab" data-toggle="tab" href="#resources" role="tab" aria-controls="resources" aria-selected="false" tab-index="1">Collabs</a>
+        </li>
+         <li class="nav-item"  role="tab">
+            <a class="nav-link" id="members-tab" data-toggle="tab" href="#members" role="tab" aria-controls="members" aria-selected="false" tab-index="2">Members</a>
+        </li>
+    </ul>
+    </div>
+    <div class="row">
+    <div class="tab-content col-12" id="myTabContent">
+        <div class="tab-pane show active" id="discussion" role="tabpanel" aria-labelledby="discussion-tab">
+            {% if discussions %}
+            <ul class="list-group" style="margin-bottom: 1rem;" role="tablist">
+                {% for discussion in discussions %}
+                    
+                        <li class="list-group-item message" role="tab">
+                            
+                            <div class="message-body">
+                                {{discussion.body}}
+                            </div>
+                            <div class="message-sender">
+                                {{discussion.sender.FirstName}} {{discussion.sender.LastName}}
+                            </div>
+                            {% if is_admin %}
+                                <div class="admin-delete btn btn-danger">
+                                    X
+                                </div>
+                            {% endif %}
+                        </li>
+                    
+                {% endfor %}
+            </ul>
+            {% endif %}
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#discussionModal">
+            Add To Discussion
+        </button>
+         <div class="modal fade" id="discussionModal" tabindex="-1" role="dialog" aria-labelledby="discussioneModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="discussionModalLabel">Add to discussion</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/courses/{{course.courseCode}}/discussion" method="post">
+                        <label for="discussionbody">Comment:</label>
+                        <textarea id="discussionbody" class="form-control" name="discussionbody"> </textarea>
+                        <div class="modal-footer">
+                            <input type="submit" value="Submit Comment" class="btn btn-primary">
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>                                
+              </div>
+            </div>
+          </div>
+        {% if error %}
+            <p class="error">
+                {{error}}
+            </p>
+        {% endif %}
+        </div>
+        <div class="tab-pane show" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+            <div class="container content">
+            {% if resources %}
+                <div class="row" style="margin-top:2rem">
+                    {% for resource in resources %}
+                    <div class="col-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {{resource.resourceName }}
+                                </h5>
+                                
+                                <p class="card-text">
+                                    {{resource.resourceDescription}}
+                                </p>
+                                <div class="btn-group">
+                                    <a href="/courses/{{course.courseCode}}/{{resource.id}}" class="btn btn-secondary">
+                                        View Discussion
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            </div>
+        {% if is_admin %}
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#resourceModal" style="margin-left:15px;">
+            Add Topic
+        </button>
+        {% endif %}
+        <div class="modal fade" id="resourceModal" tabindex="-1" role="dialog" aria-labelledby="collabModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="collabModalLabel">Add a collab</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/courses/{{course.courseCode}}/resource" method="post">
+                        <div class="form-group">
+                            <label for="resourcename">Collab Title: </label>
+                            <input id="resourcename" class="form-control" type="text" name="resourcename">
+                        </div>
+                        <div class="form-group">
+                            <label for="resourcedesc">Collab Description:</label>
+                            <textarea id="resourcedesc" class="form-control" type="text" name="resourcedesc"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <input id="coursecode" type="hidden" name='coursecode' value={{course.courseCode}}>
+                            <input type="submit" value="Submit" class="btn btn-primary">
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>                
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane show" id="members" role="tabpanel" aria-labelledby="members-tab">
+            {% if profiles %}
+                <div class="member-group" role="list">
+                    {% for member in profiles %}
+                        <h3 role="listitem">
+                            {% if member.is_admin %}
+                            <div class="btn-group">
+                                <a href="/profile/{{member.id}}" class="badge badge-success">
+                                    {{member.FirstName}} {{member.LastName}} <span class="badge badge-light">Admin </span>
+                                </a>
+                            </div>
+                                
+                            {% else %}
+                                <a href="/profile/{{member.id}}" class="badge badge-primary">
+                                    {{member.FirstName}} {{member.LastName}}
+                                </a>
+                            {% endif %}
+                        </h3>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>  
+    </div>  
+</body>
+{% endblock %}

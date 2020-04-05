@@ -1,0 +1,86 @@
+{% extends "core.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div class="card" style="margin-bottom: 1rem; padding: 1rem">
+                {% if self %}
+                    <h5 >You are logged in as: {{profile.FirstName}} {{profile.LastName}}</h5>
+                    
+                {% else %}
+                    <h5 role="heading">{{profile.FirstName}} {{profile.LastName}}</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#messageModal" role="button">
+                            Send Message
+                        </button>
+                        {% if is_admin %}                            
+                            <a type="button" class="btn btn-danger" role="button" href="/deleteuser/{{profile.id}}">
+                                Delete User
+                            </a>
+                        {% endif %}
+                        <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="messageModalLabel">Send {{profile.FirstName}} a message</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/messages/{{profile.id}}" method="post" style="margin-top: 2rem;">
+                                        {% csrf_token %}
+                                        <div class="form-group">            
+                                            <label for="message">Message</label>
+                                            <input id="message" name="message" type="text" class="form-control">
+                                        </div>
+                                        <div class="form-group">              
+                                            <input type="submit" value="Send Message" style="width: auto" class="btn btn-primary">
+                                        </div>
+                                    </form>                                
+                                </div>
+                                
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+            
+    </div>
+</div>
+<div class="card">
+</div>
+{% if courses %}
+        <div class="container content" >
+            {% if self %}
+                <h1>Your Courses</h1>
+            {% endif %}
+            <div class="row" role="list">
+                {% for course in courses %}
+                    <div class="col col-md-4 col-sm-6" role="listitem">
+                        <div class="card" style="text-align: center">
+                            <div class="card-content">
+                                <a href="/courses/{{course.courseCode}}" aria-label="View Course {{course.courseCode}} {{course.courseName}}">
+                                    <h4 class="card-title">
+                                        {{course.courseCode}}: {{course.courseName}}
+                                    </h4>
+                                    
+                                    <div class="btn-group">
+                                        <a href="/courses/{{course.courseCode}}" class="btn btn-primary">
+                                            View Course
+                                        </a>
+                                    </div>
+                                </a>
+                            </div>                        
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <h4 style="padding-left: 15px; margin-top: 1rem;">Not subscribed to any courses</h4>
+    {% endif %}
+
+{% endblock %}
