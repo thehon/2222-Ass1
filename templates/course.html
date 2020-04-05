@@ -38,7 +38,7 @@
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                             </div>
-                        </div>
+                        
                         <div class="modal-body">
                             <p>
                                 Are you sure you want to remove <br><b>{{course.courseCode}}: {{course.courseName}} ?</b><br>
@@ -55,7 +55,7 @@
                         </div>
                         </div>
                     </div>
-
+                </div>
     
     {% endif %}
     </div>  
@@ -93,12 +93,18 @@
                                 {{discussion.body}}
                             </div>
                             <div class="message-sender">
-                                {{discussion.sender.FirstName}} {{discussion.sender.LastName}}
+                                <a href="/profile/{{discussion.sender.id}}" aria-label="View Profile">
+                                    {{discussion.sender.FirstName}} {{discussion.sender.LastName}}
+                                </a>
                             </div>
                             {% if is_admin %}
-                                <div class="admin-delete btn btn-danger">
-                                    X
-                                </div>
+                            
+                                
+                                    <form action="/courses/{{course.courseCode}}/discussion/{{discussion.id}}" method="post">
+                                        {% csrf_token %}
+                                        <input type='submit' aria-label="remove comment" value="X" class="admin-delete btn btn-danger">
+                                    </form>
+                                
                             {% endif %}
                         </li>
                     
@@ -141,7 +147,7 @@
             {% if resources %}
                 <div class="row" style="margin-top:2rem">
                     {% for resource in resources %}
-                    <div class="col-4">
+                    <div class="col-4" style="margin-bottom: 1rem;">
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">
